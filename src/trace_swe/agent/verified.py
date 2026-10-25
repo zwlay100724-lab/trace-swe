@@ -192,7 +192,7 @@ class VerifiedAgent(ResumableAgent):
         return {"patch_path": str(path), "patch_bytes": len(patch), "patch_sha256": hashlib.sha256(patch).hexdigest()}
 
     def _feedback_message(self, result: dict) -> dict:
-        output = result.get("output_preview", "")
+        output = (result.get("output") or result.get("output_preview", ""))[: self.config.verify_feedback_max_chars]
         if result.get("output_ref"):
             output += f"\n(full output: {result['output_ref']})"
         return self.model.format_message(
@@ -202,7 +202,7 @@ class VerifiedAgent(ResumableAgent):
                 f"{self.config.verify_max_attempts}).\n"
                 f"Command: {self.config.verify_command}\n"
                 f"Return code: {result.get('returncode')}\n"
-                f"Output:\n{output[: self.config.verify_feedback_max_chars]}\n"
+                f"Output:\n{output}\n"
                 "Fix the issue and submit again with `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT`."
             ),
         )

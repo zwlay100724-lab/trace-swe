@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Literal
 
 from trace_swe.agent.event_log import EventLogAgent, EventLogAgentConfig
-from trace_swe.infra.event_log import read_events
+from trace_swe.infra.event_log import read_events, resolve_event_log
 
 
 class ResumeBlocked(RuntimeError):
@@ -37,7 +37,7 @@ class ResumableAgent(EventLogAgent):
         self._task = info.get("task", "")
         self.extra_template_vars |= {"task": self._task}
 
-        state = self._resume_state(info)
+        state = self._resume_state(info, trajectory_path)
         workspace, workspace_changed = self._check_can_resume(state)
         self.events.new_run(state["run_id"], start_seq=state["next_seq"])
         self._step_index = state["steps"]
@@ -55,14 +55,19 @@ class ResumableAgent(EventLogAgent):
             workspace_probe=probe,
         )
 
-    def _resume_state(self, info: dict) -> dict:
+    def _resume_state(self, info: dict, trajectory_path: Path) -> dict:
         events_config = info.get("events") or {}
+        log_path = resolve_event_log(trajectory_path, info)
+        if events_config.get("path") and log_path is None:
+            raise ResumeBlocked(
+                f"Refusing to resume: the event log '{events_config['path']}' was not found, so the last clean "
+                "step boundary cannot be verified."
+            )
         events = []
-        if log_path := events_config.get("path"):
-            if Path(log_path).exists():
-                events = read_events(Path(log_path))
-                if run_id := events_config.get("run_id"):
-                    events = [e for e in events if e.get("run_id") == run_id] or events
+        if log_path is not None:
+            events = read_events(log_path)
+            if run_id := events_config.get("run_id"):
+                events = [e for e in events if e.get("run_id") == run_id] or events
         snapshots = [e for e in events if e.get("event") == "snapshot_written"]
         last_snapshot = max((i for i, e in enumerate(events) if e.get("event") == "snapshot_written"), default=-1)
         return {

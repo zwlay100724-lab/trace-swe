@@ -9,7 +9,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from trace_swe.infra.event_log import read_events
+from trace_swe.infra.event_log import read_events, resolve_event_log
 from trace_swe.llm.utils.usage import sum_usage
 
 app = typer.Typer(rich_markup_mode="rich")
@@ -96,10 +96,9 @@ def _step_rows(events: list[dict]) -> list[dict]:
 def _resolve(path: Path) -> Path:
     if path.suffix == ".jsonl":
         return path
-    events = (json.loads(path.read_text()).get("info", {}).get("events") or {}).get("path")
-    candidate = Path(events) if events else Path(f"{path}.events.jsonl")
-    if not candidate.exists():
-        raise typer.BadParameter(f"No event log found at '{candidate}'")
+    info = json.loads(path.read_text()).get("info", {})
+    if (candidate := resolve_event_log(path, info)) is None:
+        raise typer.BadParameter(f"No event log found for '{path}'")
     return candidate
 
 

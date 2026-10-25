@@ -92,6 +92,19 @@ def read_events(path: Path) -> list[dict]:
     return events
 
 
+def resolve_event_log(trajectory: Path, info: dict) -> Path | None:
+    """Resolve a trajectory's event log, preferring paths relative to the trajectory."""
+    declared = (info.get("events") or {}).get("path")
+    candidates: list[Path] = []
+    if declared:
+        declared_path = Path(declared)
+        candidates.extend(
+            [declared_path] if declared_path.is_absolute() else [trajectory.parent / declared_path, declared_path]
+        )
+    candidates.append(Path(f"{trajectory}.events.jsonl"))
+    return next((path for path in candidates if path.is_file()), None)
+
+
 _current_event_log: ContextVar[EventLogWriter | None] = ContextVar("trace_swe_event_log", default=None)
 
 

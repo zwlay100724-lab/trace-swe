@@ -10,7 +10,7 @@ from rich.console import Console
 from rich.table import Table
 
 from trace_swe.cli.commands.events import summarize
-from trace_swe.infra.event_log import read_events
+from trace_swe.infra.event_log import read_events, resolve_event_log
 
 OUTCOMES = ("Succeeded", "VerificationFailed", "Unverified", "Incomplete", "Error")
 INCOMPLETE_EXITS = frozenset({"LimitsExceeded", "TimeExceeded", "RepeatedFormatError"})
@@ -156,18 +156,6 @@ def _dedupe(paths: list[Path]) -> list[Path]:
     return result
 
 
-def _resolve_event_log(trajectory: Path, info: dict) -> Path | None:
-    declared = (info.get("events") or {}).get("path")
-    candidates = []
-    if declared:
-        declared_path = Path(declared)
-        candidates.extend(
-            [declared_path] if declared_path.is_absolute() else [trajectory.parent / declared_path, declared_path]
-        )
-    candidates.append(Path(f"{trajectory}.events.jsonl"))
-    return next((p for p in candidates if p.is_file()), None)
-
-
 def _stem(path: Path) -> str:
     if path.name.endswith(".traj.json"):
         return path.name[: -len(".traj.json")] or path.parent.name
@@ -222,7 +210,7 @@ def build_run(trajectory: Path) -> dict:
 
     info = data.get("info") or {}
     messages = data.get("messages") if isinstance(data.get("messages"), list) else None
-    event_log = _resolve_event_log(trajectory, info)
+    event_log = resolve_event_log(trajectory, info)
     event_summary, event_error = {}, None
     if event_log is not None:
         try:
