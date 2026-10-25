@@ -2,10 +2,8 @@
 
 !!! abstract "Overview"
 
-    * We provide two scripts to run on the [SWE-bench](https://www.swebench.com/) benchmark.
-    * `mini-extra swebench` runs on all task instances in batch mode.
-    * `mini-extra swebench-single` runs on a single task instance with interactivity (useful for debugging).
-    * You can also take a look at the runscripts to figure out how to build your own batch processing pipeline.
+    * `trace-extra swebench` runs the [SWE-bench](https://www.swebench.com/) benchmark on all task instances in batch mode.
+    * You can also take a look at the run script to figure out how to build your own batch processing pipeline.
 
 <figure markdown="span">
   <div class="gif-container gif-container-styled" data-glightbox-disabled>
@@ -25,44 +23,39 @@
 
 !!! tip "Quickstart"
 
-    We provide two different scripts: `swebench` and `swebench-single`:
+    Batch mode runs on all task instances in parallel.
 
-    === "Batch mode"
+    ```bash
+    trace-extra swebench --help
+    # or
+    python src/trace_swe/benchmarks/swebench.py --help
+    # Example:
+    trace-extra swebench \
+        --model anthropic/claude-sonnet-4-5-20250929 \
+        --subset verified \
+        --split test \
+        --workers 4
+    ```
 
-        Batch mode runs on all task instances in parallel.
+    Basic flags:
 
-        ```bash
-        mini-extra swebench --help
-        # or
-        python src/trace_swe/benchmarks/swebench.py --help
-        # Example:
-        mini-extra swebench \
-            --model anthropic/claude-sonnet-4-5-20250929 \
-            --subset verified \
-            --split test \
-            --workers 4
-        ```
+    - `-o`, `--output` - Output directory
+    - `-m`, `--model` - Model to use
+    - `-c`, `--config` - Path to a config file (default: `swebench.yaml` in the `config` directory)
+    - `-w`, `--workers` - Number of worker threads for parallel processing (default: `1`)
 
-        Basic flags:
+    Data selection flags:
 
-        - `-o`, `--output` - Output directory
-        - `-m`, `--model` - Model to use
-        - `-c`, `--config` - Path to a config file (default: `swebench.yaml` in the `config` directory)
-        - `-w`, `--workers` - Number of worker threads for parallel processing (default: `1`)
+    - `--subset` - SWEBench subset to use or path to a dataset (default: `lite`)
+    - `--split` - Dataset split (default: `dev`)
+    - `--slice` - Slice specification (e.g., '0:5' for first 5 instances)
+    - `--filter` - Filter instance IDs by regex
+    - `--shuffle` - Shuffle instances (default: `False`)
+    - `--redo-existing` - Redo existing instances (default: `False`)
 
-        Data selection flags:
+    Advanced flags:
 
-        - `--subset` - SWEBench subset to use or path to a dataset (default: `lite`)
-        - `--split` - Dataset split (default: `dev`)
-        - `--slice` - Slice specification (e.g., '0:5' for first 5 instances)
-        - `--filter` - Filter instance IDs by regex
-        - `--shuffle` - Shuffle instances (default: `False`)
-        - `--redo-existing` - Redo existing instances (default: `False`)
-
-        Advanced flags:
-
-        - `--environment-class` - Environment type to use (recommended: `docker`)
-        - `--exit-immediately` - Exit immediately when the agent wants to finish instead of prompting (default: `False`)
+    - `--environment-class` - Environment type to use (recommended: `docker`)
 
 !!! tip "Evaluating on SWE-bench"
 
