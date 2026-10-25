@@ -59,7 +59,8 @@ dev = [
     "pre-commit",
     "ruff",
     "mkdocs-include-markdown-plugin",
-    "mkdocstrings[python]>=0.18",
+    "mkdocstrings[python]>=0.18,<2",
+    "pymdown-extensions<12",  # pymdown 12 changed Highlight.__init__; mkdocstrings still uses the old signature
     "mike",
     "mkdocs-material",
     "mkdocs-glightbox",

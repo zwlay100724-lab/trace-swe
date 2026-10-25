@@ -20,6 +20,12 @@
     The docker containers for Linux assume an x86 Linux architecture;
     you might not be able to run them on other architectures.
 
+!!! note "Scoring"
+
+    The batch runner writes `preds.json` for the official SWE-bench evaluation (see below).
+    It does not emit event logs or a `task_state`, so `trace-extra eval` reports these runs as
+    `Unverified`. Use the harness for pass@1; use `trace-extra eval` for verified single runs.
+
 
 !!! tip "Quickstart"
 
