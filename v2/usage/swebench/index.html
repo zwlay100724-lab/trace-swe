@@ -2181,6 +2181,12 @@
 <p>The docker containers for Linux assume an x86 Linux architecture;
 you might not be able to run them on other architectures.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Scoring</p>
+<p>The batch runner writes <code>preds.json</code> for the official SWE-bench evaluation (see below).
+It does not emit event logs or a <code>task_state</code>, so <code>trace-extra eval</code> reports these runs as
+<code>Unverified</code>. Use the harness for pass@1; use <code>trace-extra eval</code> for verified single runs.</p>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">Quickstart</p>
 <p>Batch mode runs on all task instances in parallel.</p>

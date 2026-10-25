@@ -2539,7 +2539,8 @@ the git commit and dirty flag, model, temperature, task-set hash, command, and r
 <li>The agent hierarchy is single-inheritance: <code>ContextManagedAgent</code> and <code>VerifiedAgent</code> cannot be
   combined without a mixin or wrapper refactor.</li>
 <li>Benchmark runners construct <code>ProgressTrackingAgent(DefaultAgent)</code> directly, so they do not emit
-  event logs yet.</li>
+  event logs or <code>task_state</code>; <code>trace-extra eval</code> reports their runs as <code>Unverified</code>. Score them
+  with the official SWE-bench harness instead.</li>
 <li>Workspace fingerprints and patch export are limited to local git worktrees; remote environments
   and non-git workspaces fall back to the event-boundary check alone.</li>
 <li>Patch export is limited to <code>LocalEnvironment</code>; remote environments need their own export path.</li>
