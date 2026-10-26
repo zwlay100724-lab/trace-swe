@@ -2298,18 +2298,23 @@
 resume, verification, and evaluation as layers on top. The shared substrate is an append-only
 event log.</p>
 <h2 id="layers">Layers</h2>
-<div class="highlight"><pre><span></span><code>DefaultAgent
-  └── InteractiveAgent
-        └── EventLogAgent              # event log + large-output offload
-              ├── ResumableAgent       # resume from a saved trajectory
-              │     └── VerifiedAgent  # verify a submission before accepting it
-              └── ContextManagedAgent  # age out old observations
+<div class="highlight"><pre><span></span><code>EventLogMixin                          # event log + large-output offload (non-interactive)
+├── EventLogAgent                      # EventLogMixin + InteractiveAgent
+│     ├── ResumableAgent               # resume from a saved trajectory
+│     │     └── VerifiedAgent          # verify a submission before accepting it
+│     └── ContextManagedAgent          # age out old observations
+└── ProgressTrackingAgent              # EventLogMixin + DefaultAgent (SWE-bench)
+
+DefaultAgent
+└── InteractiveAgent                   # event-less interactive base
 </code></pre></div>
 <p>Run scripts select a class with <code>--agent-class</code> (or <code>agent.agent_class</code> in YAML), so the default
-<code>mini</code> behavior is unchanged unless a feature is requested.</p>
+<code>trace</code> behavior is unchanged unless a feature is requested.</p>
 <h2 id="event-log">Event log</h2>
-<p><code>EventLogAgent</code> wraps the model and environment in transparent proxies. The agent loop, messages,
-and trajectory format are not modified; the log is a side channel.</p>
+<p><code>EventLogMixin</code> wraps the model and environment in transparent proxies. The agent loop, messages,
+and trajectory format are not modified; the log is a side channel. Because the mixin does not
+inherit from <code>InteractiveAgent</code>, it can also log non-interactive agents such as the SWE-bench
+batch runner.</p>
 <p><code>EventLogWriter</code> writes one JSON object per line to <code>&lt;output_path&gt;.events.jsonl</code> (or
 <code>event_log_path</code>). Every line is flushed, so a crash leaves a valid prefix. <code>read_events()</code> tolerates
 a truncated final line but rejects corruption in the middle.</p>
@@ -2538,9 +2543,9 @@ the git commit and dirty flag, model, temperature, task-set hash, command, and r
 <ul>
 <li>The agent hierarchy is single-inheritance: <code>ContextManagedAgent</code> and <code>VerifiedAgent</code> cannot be
   combined without a mixin or wrapper refactor.</li>
-<li>Benchmark runners construct <code>ProgressTrackingAgent(DefaultAgent)</code> directly, so they do not emit
-  event logs or <code>task_state</code>; <code>trace-extra eval</code> reports their runs as <code>Unverified</code>. Score them
-  with the official SWE-bench harness instead.</li>
+<li>Benchmark runners use <code>EventLogMixin</code> but do not record <code>task_state</code>; they emit event logs
+  (timing, tokens, retries), while <code>trace-extra eval</code> reports their success as <code>Unverified</code>.
+  Score them with the official SWE-bench harness instead.</li>
 <li>Workspace fingerprints and patch export are limited to local git worktrees; remote environments
   and non-git workspaces fall back to the event-boundary check alone.</li>
 <li>Patch export is limited to <code>LocalEnvironment</code>; remote environments need their own export path.</li>
