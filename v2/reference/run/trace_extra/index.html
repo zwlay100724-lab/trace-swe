@@ -2205,7 +2205,7 @@
 <summary>Full source code</summary>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
 
-<span class="sd">"""This is the central entry point to the mini-extra script. Use subcommands</span>
+<span class="sd">"""This is the central entry point to the trace-extra script. Use subcommands</span>
 <span class="sd">to invoke other command line utilities like running on benchmarks, editing config,</span>
 <span class="sd">inspecting trajectories, etc.</span>
 <span class="sd">"""</span>
@@ -2250,7 +2250,7 @@
 
     <span class="k">for</span> <span class="n">module_path</span><span class="p">,</span> <span class="n">aliases</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">subcommands</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">aliases</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">import_module</span><span class="p">(</span><span class="n">module_path</span><span class="p">)</span><span class="o">.</span><span class="n">app</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">prog_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"mini-extra </span><span class="si">{</span><span class="n">aliases</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">import_module</span><span class="p">(</span><span class="n">module_path</span><span class="p">)</span><span class="o">.</span><span class="n">app</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">prog_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"trace-extra </span><span class="si">{</span><span class="n">aliases</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">Console</span><span class="p">()</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">get_docstring</span><span class="p">())</span>
 
@@ -2275,7 +2275,7 @@
 
     <div class="doc doc-contents first">
 
-        <p>This is the central entry point to the mini-extra script. Use subcommands
+        <p>This is the central entry point to the trace-extra script. Use subcommands
 to invoke other command line utilities like running on benchmarks, editing config,
 inspecting trajectories, etc.</p>
 
@@ -2429,7 +2429,7 @@ inspecting trajectories, etc.</p>
 
     <span class="k">for</span> <span class="n">module_path</span><span class="p">,</span> <span class="n">aliases</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">subcommands</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">aliases</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">import_module</span><span class="p">(</span><span class="n">module_path</span><span class="p">)</span><span class="o">.</span><span class="n">app</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">prog_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"mini-extra </span><span class="si">{</span><span class="n">aliases</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">import_module</span><span class="p">(</span><span class="n">module_path</span><span class="p">)</span><span class="o">.</span><span class="n">app</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">prog_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"trace-extra </span><span class="si">{</span><span class="n">aliases</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">Console</span><span class="p">()</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">get_docstring</span><span class="p">())</span>
 </code></pre></div></td></tr></tbody></table></div>

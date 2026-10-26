@@ -2297,9 +2297,9 @@
 
 <h1 id="cookbook">Cookbook</h1>
 <div class="admonition abstract">
-<p class="admonition-title">Remixing &amp; extending mini</p>
+<p class="admonition-title">Remixing &amp; extending trace-swe</p>
 <ul>
-<li>This guide shows how to mix the different components of the <code>mini</code> agent to create your own custom version.</li>
+<li>This guide shows how to mix the different components of the <code>trace</code> agent to create your own custom version.</li>
 <li>You might want to first take a look at the <a href="../control_flow/">control flow of the default agent</a> first</li>
 </ul>
 </div>
@@ -2309,14 +2309,14 @@
 </div>
 <p>We provide several different entry points to the agent,
 for example <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/cli/hello_world.py">hello world</a>,
-or the <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/cli/trace.py">default when calling <code>mini</code></a>.</p>
+or the <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/cli/trace.py">default when calling <code>trace</code></a>.</p>
 <p>Want to cook up your custom version and the config is not enough?
 Just follow the recipe below:</p>
 <ol>
 <li>What's the control flow you need? Pick an <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/agent">agent class</a> (e.g., <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/agent/default.py">simplest example</a>, <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/agent/interactive.py">with human in the loop</a>)</li>
 <li>How should actions be executed? Pick an <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/execution">environment class</a> (e.g., <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/execution/local.py">local</a>, or <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/execution/docker.py">docker</a>)</li>
 <li>How is the LM queried? Pick a <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/llm">model class</a> (e.g., <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/llm/litellm_model.py">litellm</a>)</li>
-<li>How to invoke the agent? Bind them all together in a <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/cli">run script</a>, possibly reading from a <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/config">config</a> (e.g., <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/cli/hello_world.py">hello world</a>, or <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/cli/trace.py"><code>mini</code> entry point</a>)</li>
+<li>How to invoke the agent? Bind them all together in a <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/cli">run script</a>, possibly reading from a <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/config">config</a> (e.g., <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/cli/hello_world.py">hello world</a>, or <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/cli/trace.py"><code>trace</code> entry point</a>)</li>
 </ol>
 <p>We aim to keep all of these components very simple, but offer lots of choice between them -- enough to cover a broad range of
 things that you might want to do.</p>

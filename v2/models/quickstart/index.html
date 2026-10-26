@@ -2187,14 +2187,14 @@
 <div class="admonition tip">
 <p class="admonition-title">Setup</p>
 <ul>
-<li>Run <code>mini-extra config setup</code> once to set the default model and API key.</li>
+<li>Run <code>trace-extra config setup</code> once to set the default model and API key.</li>
 <li>This project uses one model path: <a href="https://github.com/BerriAI/litellm"><code>litellm</code></a> with tool calling.</li>
 </ul>
 </div>
 <h2 id="setting-api-keys">Setting API keys</h2>
 <ul>
-<li><strong>Recommended</strong>: <code>mini-extra config setup</code>.</li>
-<li><code>mini-extra config set ANTHROPIC_API_KEY &lt;your-api-key&gt;</code> writes the key to the
+<li><strong>Recommended</strong>: <code>trace-extra config setup</code>.</li>
+<li><code>trace-extra config set ANTHROPIC_API_KEY &lt;your-api-key&gt;</code> writes the key to the
   <a href="../../advanced/global_configuration/">global config file</a>.</li>
 <li>Or export it in your shell: <code>export ANTHROPIC_API_KEY=&lt;your-api-key&gt;</code>.</li>
 </ul>
@@ -2203,9 +2203,9 @@
 documented by your provider.</p>
 <h2 id="selecting-a-model">Selecting a model</h2>
 <ul>
-<li><code>mini-extra config setup</code> sets the default model.</li>
+<li><code>trace-extra config setup</code> sets the default model.</li>
 <li>Every CLI accepts <code>-m</code> / <code>--model</code>.</li>
-<li><code>mini-extra config set TRACE_SWE_MODEL_NAME &lt;model-name&gt;</code> sets the default.</li>
+<li><code>trace-extra config set TRACE_SWE_MODEL_NAME &lt;model-name&gt;</code> sets the default.</li>
 <li>A config file can set <code>model.model_name</code>.</li>
 <li>Include the provider in the name, e.g. <code>anthropic/claude-sonnet-4-5-20250929</code>,
   <code>openai/gpt-5.4</code>, or <code>deepseek/deepseek-flash</code>.</li>

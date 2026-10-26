@@ -2249,7 +2249,7 @@
 <summary>Full source code</summary>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
 
-<span class="sd">"""Run trace-swe in your local environment. This is the default executable `mini`."""</span>
+<span class="sd">"""Run trace-swe in your local environment. This is the default executable `trace`."""</span>
 <span class="c1"># Read this first: https://github.com/zwlay100724-lab/trace-swe  (usage)</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -2268,8 +2268,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">trace_swe.infra.serialize</span><span class="w"> </span><span class="kn">import</span> <span class="n">UNSET</span><span class="p">,</span> <span class="n">recursive_merge</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trace_swe.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_model</span>
 
-<span class="n">DEFAULT_CONFIG_FILE</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"TRACE_SWE_MINI_CONFIG_PATH"</span><span class="p">,</span> <span class="n">builtin_config_dir</span> <span class="o">/</span> <span class="s2">"trace.yaml"</span><span class="p">))</span>
-<span class="n">DEFAULT_OUTPUT_FILE</span> <span class="o">=</span> <span class="n">global_config_dir</span> <span class="o">/</span> <span class="s2">"last_mini_run.traj.json"</span>
+<span class="n">DEFAULT_CONFIG_FILE</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"TRACE_SWE_CONFIG_PATH"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"TRACE_SWE_MINI_CONFIG_PATH"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">builtin_config_dir</span> <span class="o">/</span> <span class="s2">"trace.yaml"</span>
+<span class="p">)</span>
+<span class="n">DEFAULT_OUTPUT_FILE</span> <span class="o">=</span> <span class="n">global_config_dir</span> <span class="o">/</span> <span class="s2">"last_run.traj.json"</span>
 
 
 <span class="n">_HELP_TEXT</span> <span class="o">=</span> <span class="s2">"""Run trace-swe in your local environment.</span>
@@ -2373,7 +2375,7 @@
 
     <div class="doc doc-contents first">
 
-        <p>Run trace-swe in your local environment. This is the default executable <code>mini</code>.</p>
+        <p>Run trace-swe in your local environment. This is the default executable <code>trace</code>.</p>
 
 
 
@@ -2406,10 +2408,9 @@
 
 </h3>
 <div class="doc-signature highlight"><pre><span></span><code><span class="n">DEFAULT_CONFIG_FILE</span> <span class="o">=</span> <span class="n"><span title="pathlib.Path">Path</span></span><span class="p">(</span>
-    <span class="n"><span title="os">os</span></span><span class="o">.</span><span class="n"><span title="os.getenv">getenv</span></span><span class="p">(</span>
-        <span class="s2">"TRACE_SWE_MINI_CONFIG_PATH"</span><span class="p">,</span>
-        <span class="n"><span title="trace_swe.config.builtin_config_dir">builtin_config_dir</span></span> <span class="o">/</span> <span class="s2">"trace.yaml"</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="n"><span title="os">os</span></span><span class="o">.</span><span class="n"><span title="os.getenv">getenv</span></span><span class="p">(</span><span class="s2">"TRACE_SWE_CONFIG_PATH"</span><span class="p">)</span>
+    <span class="ow">or</span> <span class="n"><span title="os">os</span></span><span class="o">.</span><span class="n"><span title="os.getenv">getenv</span></span><span class="p">(</span><span class="s2">"TRACE_SWE_MINI_CONFIG_PATH"</span><span class="p">)</span>
+    <span class="ow">or</span> <span class="n"><span title="trace_swe.config.builtin_config_dir">builtin_config_dir</span></span> <span class="o">/</span> <span class="s2">"trace.yaml"</span>
 <span class="p">)</span>
 </code></pre></div>
 
@@ -2433,7 +2434,7 @@
 
 </h3>
 <div class="doc-signature highlight"><pre><span></span><code><span class="n">DEFAULT_OUTPUT_FILE</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n"><span title="trace_swe.global_config_dir">global_config_dir</span></span> <span class="o">/</span> <span class="s2">"last_mini_run.traj.json"</span>
+    <span class="n"><span title="trace_swe.global_config_dir">global_config_dir</span></span> <span class="o">/</span> <span class="s2">"last_run.traj.json"</span>
 <span class="p">)</span>
 </code></pre></div>
 
@@ -2575,9 +2576,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/trace_swe/cli/trace.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tbody><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 54</span>
-<span class="normal"> 55</span>
-<span class="normal"> 56</span>
+              <div class="highlight"><table class="highlighttable"><tbody><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 56</span>
 <span class="normal"> 57</span>
 <span class="normal"> 58</span>
 <span class="normal"> 59</span>
@@ -2626,7 +2625,9 @@
 <span class="normal">102</span>
 <span class="normal">103</span>
 <span class="normal">104</span>
-<span class="normal">105</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="n">_HELP_TEXT</span><span class="p">)</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="n">_HELP_TEXT</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span>
     <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">typer</span><span class="o">.</span><span class="n">Option</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"--model"</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Model to use"</span><span class="p">,),</span>
     <span class="n">model_class</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">typer</span><span class="o">.</span><span class="n">Option</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">"--model-class"</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Model class to use (e.g., 'litellm' or 'trace_swe.llm.litellm_model.LitellmModel')"</span><span class="p">,</span> <span class="n">rich_help_panel</span><span class="o">=</span><span class="s2">"Advanced"</span><span class="p">),</span>

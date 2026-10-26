@@ -2187,7 +2187,7 @@
 <div class="admonition abstract">
 <p class="admonition-title">Overview</p>
 <ul>
-<li><code>trace</code> is the primary REPL-style interactive command line interface for using trace-swe in the local environment. <code>mini</code> remains an alias.</li>
+<li><code>trace</code> is the primary REPL-style interactive command line interface for using trace-swe in the local environment.</li>
 <li>The agent is intended for local work or sandboxed execution; it is not a batch runner.</li>
 </ul>
 </div>
@@ -2196,13 +2196,13 @@
 <ul>
 <li><code>-h</code>/<code>--help</code>: Show help</li>
 <li><code>-t</code>/<code>--task</code>: Specify a task to run (else you will be prompted)</li>
-<li><code>-c</code>/<code>--config</code>: Specify a config file to use, else we will use <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/config/trace.yaml"><code>trace.yaml</code></a> or the config <code>TRACE_SWE_MINI_CONFIG_PATH</code> environment variable (see <a href="../../advanced/global_configuration/">global configuration</a>).
+<li><code>-c</code>/<code>--config</code>: Specify a config file to use, else we will use <a href="https://github.com/zwlay100724-lab/trace-swe/blob/main/src/trace_swe/config/trace.yaml"><code>trace.yaml</code></a> or the config <code>TRACE_SWE_CONFIG_PATH</code> environment variable (see <a href="../../advanced/global_configuration/">global configuration</a>).
   It's enough to specify the name of the config file, e.g., <code>-c trace.yaml</code> (see <a href="../../advanced/global_configuration/">global configuration</a> for how it is resolved).</li>
 <li><code>-m</code>/<code>--model</code>: Specify a model to use, else we will use the model <code>TRACE_SWE_MODEL_NAME</code> environment variable (see <a href="../../advanced/global_configuration/">global configuration</a>)</li>
 <li><code>-y</code>/<code>--yolo</code>: Start in <code>yolo</code> mode (see below)</li>
 </ul>
 <h2 id="modes-of-operation">Modes of operation</h2>
-<p><code>mini</code> provides three different modes of operation</p>
+<p><code>trace</code> provides three different modes of operation</p>
 <ul>
 <li><code>confirm</code> (<code>/c</code>): The LM proposes an action and the user is prompted to confirm (press Enter) or reject (enter a rejection message)</li>
 <li><code>yolo</code> (<code>/y</code>): The action from the LM is executed immediately without confirmation</li>
@@ -2210,11 +2210,11 @@
 </ul>
 <p>You can switch between the modes with the <code>/c</code>, <code>/y</code>, and <code>/u</code> commands that you can enter any time the agent is waiting for input.
 You can also press <code>Ctrl+C</code> to interrupt the agent at any time, allowing you to switch between modes.</p>
-<p><code>mini</code> starts in <code>confirm</code> mode by default. To start in <code>yolo</code> mode, you can add <code>-y</code>/<code>--yolo</code> to the command line.</p>
+<p><code>trace</code> starts in <code>confirm</code> mode by default. To start in <code>yolo</code> mode, you can add <code>-y</code>/<code>--yolo</code> to the command line.</p>
 <h2 id="miscellaneous-tips">Miscellaneous tips</h2>
 <ul>
-<li><code>mini</code> saves the full history of your last run to your global config directory.
-  The path to the directory is printed when you start <code>mini</code>.</li>
+<li><code>trace</code> saves the full history of your last run to your global config directory.
+  The path to the directory is printed when you start <code>trace</code>.</li>
 </ul>
 <h2 id="implementation">Implementation</h2>
 <details class="note">
@@ -2387,7 +2387,7 @@ You can also press <code>Ctrl+C</code> to interrupt the agent at any time, allow
 </ul>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
 
-<span class="sd">"""Run trace-swe in your local environment. This is the default executable `mini`."""</span>
+<span class="sd">"""Run trace-swe in your local environment. This is the default executable `trace`."""</span>
 <span class="c1"># Read this first: https://github.com/zwlay100724-lab/trace-swe  (usage)</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -2406,8 +2406,10 @@ You can also press <code>Ctrl+C</code> to interrupt the agent at any time, allow
 <span class="kn">from</span><span class="w"> </span><span class="nn">trace_swe.infra.serialize</span><span class="w"> </span><span class="kn">import</span> <span class="n">UNSET</span><span class="p">,</span> <span class="n">recursive_merge</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trace_swe.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_model</span>
 
-<span class="n">DEFAULT_CONFIG_FILE</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"TRACE_SWE_MINI_CONFIG_PATH"</span><span class="p">,</span> <span class="n">builtin_config_dir</span> <span class="o">/</span> <span class="s2">"trace.yaml"</span><span class="p">))</span>
-<span class="n">DEFAULT_OUTPUT_FILE</span> <span class="o">=</span> <span class="n">global_config_dir</span> <span class="o">/</span> <span class="s2">"last_mini_run.traj.json"</span>
+<span class="n">DEFAULT_CONFIG_FILE</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"TRACE_SWE_CONFIG_PATH"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"TRACE_SWE_MINI_CONFIG_PATH"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">builtin_config_dir</span> <span class="o">/</span> <span class="s2">"trace.yaml"</span>
+<span class="p">)</span>
+<span class="n">DEFAULT_OUTPUT_FILE</span> <span class="o">=</span> <span class="n">global_config_dir</span> <span class="o">/</span> <span class="s2">"last_run.traj.json"</span>
 
 
 <span class="n">_HELP_TEXT</span> <span class="o">=</span> <span class="s2">"""Run trace-swe in your local environment.</span>

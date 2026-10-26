@@ -2219,9 +2219,9 @@
 
 <h1 id="global-configuration">Global configuration</h1>
 <div class="admonition abstract">
-<p class="admonition-title">Configuring mini</p>
+<p class="admonition-title">Configuring trace-swe</p>
 <ul>
-<li>This guide shows how to configure the <code>mini</code> agent's global settings (API keys, default model, etc.).
+<li>This guide shows how to configure the <code>trace</code> agent's global settings (API keys, default model, etc.).
   Basically anything that is set as environment variables or similar.</li>
 <li>You should already be familiar with the <a href="../../quickstart/">quickstart guide</a>.</li>
 <li>For more agent specific settings, see the <a href="../yaml_configuration/">yaml configuration file guide</a>.</li>
@@ -2232,25 +2232,25 @@
 <p>Setting up models is also covered in the <a href="../../quickstart/">quickstart guide</a>.</p>
 </div>
 <h2 id="setting-global-configuration">Setting global configuration</h2>
-<p>All global configuration can be either set as environment variables, or in the <code>.env</code> file (the exact location is printed when you run <code>mini</code>).
+<p>All global configuration can be either set as environment variables, or in the <code>.env</code> file (the exact location is printed when you run <code>trace</code>).
 Environment variables take precedence over variables set in the <code>.env</code> file.</p>
 <p>We provide several helper functions to update the global configuration.</p>
 <p>For example, to set the default model and API keys, you can run:</p>
-<div class="highlight"><pre><span></span><code>mini-extra<span class="w"> </span>config<span class="w"> </span>setup
+<div class="highlight"><pre><span></span><code>trace-extra<span class="w"> </span>config<span class="w"> </span>setup
 </code></pre></div>
 <p>or to update specific settings:</p>
-<div class="highlight"><pre><span></span><code>mini-extra config set KEY VALUE
+<div class="highlight"><pre><span></span><code>trace-extra config set KEY VALUE
 # e.g.,
-mini-extra config set TRACE_SWE_MODEL_NAME "anthropic/claude-sonnet-4-5-20250929"
-mini-extra config set ANTHROPIC_API_KEY "sk-..."
+trace-extra config set TRACE_SWE_MODEL_NAME "anthropic/claude-sonnet-4-5-20250929"
+trace-extra config set ANTHROPIC_API_KEY "sk-..."
 </code></pre></div>
 <p>or to unset a key:</p>
-<div class="highlight"><pre><span></span><code>mini-extra<span class="w"> </span>config<span class="w"> </span><span class="nb">unset</span><span class="w"> </span>KEY
+<div class="highlight"><pre><span></span><code>trace-extra<span class="w"> </span>config<span class="w"> </span><span class="nb">unset</span><span class="w"> </span>KEY
 <span class="c1"># e.g.,</span>
-mini-extra<span class="w"> </span>config<span class="w"> </span><span class="nb">unset</span><span class="w"> </span>ANTHROPIC_API_KEY
+trace-extra<span class="w"> </span>config<span class="w"> </span><span class="nb">unset</span><span class="w"> </span>ANTHROPIC_API_KEY
 </code></pre></div>
 <p>You can also edit the <code>.env</code> file directly and we provide a helper function for that:</p>
-<div class="highlight"><pre><span></span><code>mini-extra<span class="w"> </span>config<span class="w"> </span>edit
+<div class="highlight"><pre><span></span><code>trace-extra<span class="w"> </span>config<span class="w"> </span>edit
 </code></pre></div>
 <p>To set environment variables (recommended for temporary experimentation or API keys):</p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">KEY</span><span class="o">=</span><span class="s2">"value"</span>
@@ -2291,9 +2291,9 @@ setx<span class="w"> </span>KEY<span class="w"> </span><span class="s2">"value"<
 <span class="c1"># This allows to specify them by names</span>
 <span class="nv">TRACE_SWE_CONFIG_DIR</span><span class="o">=</span><span class="s2">"/path/to/your/own/config/dir"</span>
 
-<span class="c1"># Config path for mini run script</span>
+<span class="c1"># Config path for trace-swe run script</span>
 <span class="c1"># (default: package_dir / "config" / "trace.yaml")</span>
-<span class="nv">TRACE_SWE_MINI_CONFIG_PATH</span><span class="o">=</span><span class="s2">"/path/to/your/own/config"</span>
+<span class="nv">TRACE_SWE_CONFIG_PATH</span><span class="o">=</span><span class="s2">"/path/to/your/own/config"</span>
 
 <span class="c1"># Custom style path for trajectory inspector</span>
 <span class="c1"># (default: package_dir / "config" / "inspector.tcss")</span>
