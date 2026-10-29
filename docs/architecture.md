@@ -7,21 +7,26 @@ event log.
 ## Layers
 
 ```text
+EventLogMixin                          # event log + large-output offload (non-interactive)
+├── EventLogAgent                      # EventLogMixin + InteractiveAgent
+│     ├── ResumableAgent               # resume from a saved trajectory
+│     │     └── VerifiedAgent          # verify a submission before accepting it
+│     └── ContextManagedAgent          # age out old observations
+└── ProgressTrackingAgent              # EventLogMixin + DefaultAgent (SWE-bench)
+
 DefaultAgent
-  └── InteractiveAgent
-        └── EventLogAgent              # event log + large-output offload
-              ├── ResumableAgent       # resume from a saved trajectory
-              │     └── VerifiedAgent  # verify a submission before accepting it
-              └── ContextManagedAgent  # age out old observations
+└── InteractiveAgent                   # event-less interactive base
 ```
 
 Run scripts select a class with `--agent-class` (or `agent.agent_class` in YAML), so the default
-`mini` behavior is unchanged unless a feature is requested.
+`trace` behavior is unchanged unless a feature is requested.
 
 ## Event log
 
-`EventLogAgent` wraps the model and environment in transparent proxies. The agent loop, messages,
-and trajectory format are not modified; the log is a side channel.
+`EventLogMixin` wraps the model and environment in transparent proxies. The agent loop, messages,
+and trajectory format are not modified; the log is a side channel. Because the mixin does not
+inherit from `InteractiveAgent`, it can also log non-interactive agents such as the SWE-bench
+batch runner.
 
 `EventLogWriter` writes one JSON object per line to `<output_path>.events.jsonl` (or
 `event_log_path`). Every line is flushed, so a crash leaves a valid prefix. `read_events()` tolerates
@@ -146,7 +151,7 @@ On acceptance, `delivery_command` (default `git status --porcelain`) records the
 
 ## Evaluation
 
-`mini-extra eval` reads trajectories offline and reports:
+`trace-extra eval` reads trajectories offline and reports:
 
 - Strict success rate: only `task_state == "Succeeded"` counts.
 - Outcome buckets and failure reasons.
@@ -170,9 +175,9 @@ the git commit and dirty flag, model, temperature, task-set hash, command, and r
 
 - The agent hierarchy is single-inheritance: `ContextManagedAgent` and `VerifiedAgent` cannot be
   combined without a mixin or wrapper refactor.
-- Benchmark runners construct `ProgressTrackingAgent(DefaultAgent)` directly, so they do not emit
-  event logs or `task_state`; `trace-extra eval` reports their runs as `Unverified`. Score them
-  with the official SWE-bench harness instead.
+- Benchmark runners use `EventLogMixin` but do not record `task_state`; they emit event logs
+  (timing, tokens, retries), while `trace-extra eval` reports their success as `Unverified`.
+  Score them with the official SWE-bench harness instead.
 - Workspace fingerprints and patch export are limited to local git worktrees; remote environments
   and non-git workspaces fall back to the event-boundary check alone.
 - Patch export is limited to `LocalEnvironment`; remote environments need their own export path.

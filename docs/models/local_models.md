@@ -55,9 +55,9 @@ model:
   ...
 ```
 
-!!! tip "Updating the default `mini` configuration file"
+!!! tip "Updating the default `trace` configuration file"
 
-    You can set the `TRACE_SWE_MINI_CONFIG_PATH` setting to set path to the default `mini` configuration file.
+    You can set the `TRACE_SWE_CONFIG_PATH` setting to set path to the default `trace` configuration file.
     This will allow you to override the default configuration file with your own.
     See the [global configuration guide](../advanced/global_configuration.md) for more details.
 
@@ -135,7 +135,7 @@ The model registry JSON file should follow LiteLLM's format:
 
 There are two ways of setting the path to the model registry:
 
-1. Set `LITELLM_MODEL_REGISTRY_PATH` (e.g., `mini-extra config set LITELLM_MODEL_REGISTRY_PATH /path/to/model_registry.json`)
+1. Set `LITELLM_MODEL_REGISTRY_PATH` (e.g., `trace-extra config set LITELLM_MODEL_REGISTRY_PATH /path/to/model_registry.json`)
 2. Set `litellm_model_registry` in the agent config file
 
 ```yaml
@@ -187,7 +187,7 @@ EOF
 Now you’re ready to generate trajectories! Let's solve the `django__django-11099` instance of SWE-bench Verified:
 
 ```bash
-LITELLM_MODEL_REGISTRY_PATH=registry.json mini-extra swebench \
+LITELLM_MODEL_REGISTRY_PATH=registry.json trace-extra swebench \
     --output test/ --subset verified --split test --filter '^(django__django-11099)$'
 ```
 

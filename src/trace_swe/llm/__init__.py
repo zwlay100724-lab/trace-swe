@@ -72,7 +72,7 @@ def get_model_name(input_model_name: str | None = None, config: dict | None = No
         return from_config
     if from_env := os.getenv("TRACE_SWE_MODEL_NAME"):
         return from_env
-    raise ValueError("No default model set. Please run `mini-extra config setup` to set one.")
+    raise ValueError("No default model set. Please run `trace-extra config setup` to set one.")
 
 
 _MODEL_CLASS_MAPPING = {

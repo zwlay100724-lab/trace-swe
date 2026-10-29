@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Run trace-swe in your local environment. This is the default executable `mini`."""
+"""Run trace-swe in your local environment. This is the default executable `trace`."""
 # Read this first: https://github.com/zwlay100724-lab/trace-swe  (usage)
 
 import os
@@ -19,8 +19,10 @@ from trace_swe.execution import get_environment
 from trace_swe.infra.serialize import UNSET, recursive_merge
 from trace_swe.llm import get_model
 
-DEFAULT_CONFIG_FILE = Path(os.getenv("TRACE_SWE_MINI_CONFIG_PATH", builtin_config_dir / "trace.yaml"))
-DEFAULT_OUTPUT_FILE = global_config_dir / "last_mini_run.traj.json"
+DEFAULT_CONFIG_FILE = Path(
+    os.getenv("TRACE_SWE_CONFIG_PATH") or os.getenv("TRACE_SWE_MINI_CONFIG_PATH") or builtin_config_dir / "trace.yaml"
+)
+DEFAULT_OUTPUT_FILE = global_config_dir / "last_run.traj.json"
 
 
 _HELP_TEXT = """Run trace-swe in your local environment.

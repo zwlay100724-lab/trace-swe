@@ -1,9 +1,9 @@
-# `mini-extra config`
+# `trace-extra config`
 
 !!! abstract "Overview"
 
-    * `mini-extra config` is a utility to manage the global configuration file.
-    * Quickly start the it with `mini-extra config` or `trace-extra config`.
+    * `trace-extra config` is a utility to manage the global configuration file.
+    * Quickly start it with `trace-extra config`.
 
 ## Commands
 
@@ -12,7 +12,7 @@
 Interactive setup wizard that helps you configure your default model and API keys.
 
 ```bash
-mini-extra config setup
+trace-extra config setup
 ```
 
 This will prompt you for:
@@ -26,9 +26,9 @@ Set a specific key in the global config file.
 
 ```bash
 # example: set default model
-mini-extra config set TRACE_SWE_MODEL_NAME anthropic/claude-sonnet-4-5-20250929
+trace-extra config set TRACE_SWE_MODEL_NAME anthropic/claude-sonnet-4-5-20250929
 # or interactively
-mini-extra config set
+trace-extra config set
 ```
 
 ### `unset`
@@ -36,7 +36,7 @@ mini-extra config set
 Remove a key from the global config file.
 
 ```bash
-mini-extra config unset TRACE_SWE_MODEL_NAME
+trace-extra config unset TRACE_SWE_MODEL_NAME
 ```
 
 ### `edit`
@@ -44,7 +44,7 @@ mini-extra config unset TRACE_SWE_MODEL_NAME
 Open the global config file in your default editor (uses `$EDITOR` or `nano`).
 
 ```bash
-mini-extra config edit
+trace-extra config edit
 ```
 
 ## Configuration keys

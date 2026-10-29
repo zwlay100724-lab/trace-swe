@@ -51,8 +51,8 @@ Reports include:
 
 Only trajectories that carry `task_state == "Succeeded"` count as successes. `VerifiedAgent`
 sets that state when a verification command passes; plain event-log runs are reported as
-`Unverified`. SWE-bench batch runs are not scored by this command: they write `preds.json` for
-the official SWE-bench harness and do not record `task_state` or an event log.
+`Unverified`. SWE-bench batch runs do write event logs (timing, tokens, retries), but no
+`task_state`: their success is scored by the official SWE-bench harness from `preds.json`.
 
 ### Context management
 
@@ -115,7 +115,7 @@ trace -m deepseek/deepseek-flash \
   -t "Fix the failing test in this repository" -y
 ```
 
-The CLI commands are `trace` and `trace-extra`; `mini` and `mini-extra` remain aliases.
+The CLI commands are `trace` and `trace-extra`.
 
 ## Reproducible experiment
 
@@ -145,7 +145,7 @@ This build keeps one path per capability:
 
 - **Environments**: `local`, `docker`
 - **Models**: LiteLLM with native tool calling
-- **Benchmark**: SWE-bench batch mode (writes `preds.json` for the official harness; not scored by `trace-extra eval`)
+- **Benchmark**: SWE-bench batch mode (emits event logs and writes `preds.json` for the official harness; success is scored there)
 
 ## Project layout
 
@@ -173,7 +173,7 @@ ruff check src tests
 - Event log and workspace fingerprint are local-first.
 - Resume is conservative by default; `as_is` is at-least-once.
 - Patch export is limited to local git worktrees.
-- SWE-bench batch runs do not emit event logs or `task_state`; score them with the official harness.
+- SWE-bench batch runs emit event logs but no `task_state`; score their success with the official harness.
 - Offline eval only counts `task_state == "Succeeded"`, which currently requires a verification command.
 
 ## License

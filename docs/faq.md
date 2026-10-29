@@ -26,9 +26,9 @@
     - Excellent performance on SWE-Bench
     - A trajectory browser
 
-??? question "How is `mini` simpler than `swe-agent`?"
+??? question "How is trace-swe simpler than `swe-agent`?"
 
-    `mini` is simpler than `swe-agent` because it:
+    `trace` is simpler than `swe-agent` because it:
 
     - Does not have any tools other than bash — it doesn't even use the tool-calling interface of the LMs.
       This means you don't have to install anything in any environment you're running in. `bash` is all you need.
@@ -52,7 +52,7 @@
 ??? question "Where is global configuration stored?"
 
     The global configuration is stored in the `.env` file in the config directory.
-    The location is printed when you run `mini --help`.
+    The location is printed when you run `trace --help`.
 
     The `.env` file is a simple key-value file that is read by the `dotenv` library.
 
@@ -77,11 +77,11 @@
     To permanently set the API key in the config file, you can use the following command:
 
     ```bash
-    mini-extra config set OPENAI_API_KEY sk-test123
+    trace-extra config set OPENAI_API_KEY sk-test123
     ```
 
     Alternatively, you can directly edit the `.env` file in the config directory
-    (the location is printed when you run `mini --help`).
+    (the location is printed when you run `trace --help`).
 
 !!! question "How can I set the default model?"
 
@@ -89,11 +89,11 @@
     To permanently change it:
 
     ```bash
-    mini-extra config set TRACE_SWE_MODEL_NAME anthropic/claude-sonnet-4-5-20250929
+    trace-extra config set TRACE_SWE_MODEL_NAME anthropic/claude-sonnet-4-5-20250929
     ```
 
     Alternatively, you can directly edit the `.env` file in the config directory
-    (the location is printed when you run `mini --help`).
+    (the location is printed when you run `trace --help`).
 
 ## Minutia
 
@@ -105,11 +105,11 @@
 
     1. It's not obvious when a command has terminated. Essentially you're just pasting input into the shell session, and press enter—but when do you stop reading output?
        We've experimented with various heuristics (watching PIDs, watching for the shell to go back to the prompt, etc.) but all of them were flaky.
-       The `mini` agent doesn't need any of this!
+       The `trace` agent doesn't need any of this!
     2. Particularly bad commands from the LM can kill the shell session. Then what?
     3. Interrupting a command running in a shell session can also mess up the shell itself and can in particular interfere with all the following outputs you want to extract.
 
-    `mini` is different: There is no running shell session. Every action is executed as a subprocess, that means
+    `trace` is different: There is no running shell session. Every action is executed as a subprocess, that means
     every action is independent of the previous ones (it is literally a `subprocess.run`/`os.system`/`docker exec` call).
 
     This means that the agent cannot even change directories or export environment variables.

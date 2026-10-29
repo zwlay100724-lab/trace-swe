@@ -1,8 +1,8 @@
 # Global configuration
 
-!!! abstract "Configuring mini"
+!!! abstract "Configuring trace-swe"
 
-    * This guide shows how to configure the `mini` agent's global settings (API keys, default model, etc.).
+    * This guide shows how to configure the `trace` agent's global settings (API keys, default model, etc.).
       Basically anything that is set as environment variables or similar.
     * You should already be familiar with the [quickstart guide](../quickstart.md).
     * For more agent specific settings, see the [yaml configuration file guide](yaml_configuration.md).
@@ -13,7 +13,7 @@
 
 ## Setting global configuration
 
-All global configuration can be either set as environment variables, or in the `.env` file (the exact location is printed when you run `mini`).
+All global configuration can be either set as environment variables, or in the `.env` file (the exact location is printed when you run `trace`).
 Environment variables take precedence over variables set in the `.env` file.
 
 We provide several helper functions to update the global configuration.
@@ -21,30 +21,30 @@ We provide several helper functions to update the global configuration.
 For example, to set the default model and API keys, you can run:
 
 ```bash
-mini-extra config setup
+trace-extra config setup
 ```
 
 or to update specific settings:
 
 ```
-mini-extra config set KEY VALUE
+trace-extra config set KEY VALUE
 # e.g.,
-mini-extra config set TRACE_SWE_MODEL_NAME "anthropic/claude-sonnet-4-5-20250929"
-mini-extra config set ANTHROPIC_API_KEY "sk-..."
+trace-extra config set TRACE_SWE_MODEL_NAME "anthropic/claude-sonnet-4-5-20250929"
+trace-extra config set ANTHROPIC_API_KEY "sk-..."
 ```
 
 or to unset a key:
 
 ```bash
-mini-extra config unset KEY
+trace-extra config unset KEY
 # e.g.,
-mini-extra config unset ANTHROPIC_API_KEY
+trace-extra config unset ANTHROPIC_API_KEY
 ```
 
 You can also edit the `.env` file directly and we provide a helper function for that:
 
 ```bash
-mini-extra config edit
+trace-extra config edit
 ```
 
 To set environment variables (recommended for temporary experimentation or API keys):
@@ -103,9 +103,9 @@ TRACE_SWE_MODEL_RETRY_STOP_AFTER_ATTEMPT="10"
 # This allows to specify them by names
 TRACE_SWE_CONFIG_DIR="/path/to/your/own/config/dir"
 
-# Config path for mini run script
+# Config path for trace-swe run script
 # (default: package_dir / "config" / "trace.yaml")
-TRACE_SWE_MINI_CONFIG_PATH="/path/to/your/own/config"
+TRACE_SWE_CONFIG_PATH="/path/to/your/own/config"
 
 # Custom style path for trajectory inspector
 # (default: package_dir / "config" / "inspector.tcss")

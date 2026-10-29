@@ -22,7 +22,7 @@ from rich.console import Console
 ROOT = Path(__file__).resolve().parent
 PROJECT = ROOT.parent.parent
 VENV_BIN = PROJECT / ".venv" / "bin"
-MINI, MINI_EXTRA = VENV_BIN / "mini", VENV_BIN / "mini-extra"
+TRACE, TRACE_EXTRA = VENV_BIN / "trace", VENV_BIN / "trace-extra"
 DEFAULT_OUT = ROOT / "results"
 DEFAULT_TASKS = "sum_range,log_errors"
 DEFAULT_VARIANTS = "event_log,context"
@@ -120,7 +120,7 @@ def run_once(
     prepare_repo(task, repo)
     trajectory = run_dir / f"{task}.traj.json"
     command = [
-        str(MINI),
+        str(TRACE),
         "--agent-class",
         variant,
         "-m",
@@ -155,12 +155,12 @@ def run_once(
             env=os.environ | {"TRACE_SWE_SILENT_STARTUP": "1"},
         )
     except subprocess.TimeoutExpired as e:
-        (run_dir / "mini.log").write_text(str(e))
+        (run_dir / "trace.log").write_text(str(e))
         write_missing_trajectory(trajectory, "timeout", str(e))
         return {"variant": variant, "task": task, "run": run_index, "status": "timeout", "seconds": timeout}
-    (run_dir / "mini.log").write_text(result.stdout + "\n" + result.stderr)
+    (run_dir / "trace.log").write_text(result.stdout + "\n" + result.stderr)
     if not trajectory.exists():
-        write_missing_trajectory(trajectory, f"mini exited with {result.returncode}", result.stderr)
+        write_missing_trajectory(trajectory, f"trace exited with {result.returncode}", result.stderr)
         status = "no_trajectory"
     else:
         status = "ok" if score(repo, trajectory) else "failed"
@@ -232,7 +232,7 @@ def main(
         console.print("[yellow]Need both event_log and context variants for a baseline comparison.[/yellow]")
         return
     current, baseline = output / "context", output / "event_log"
-    eval_command = [str(MINI_EXTRA), "eval", str(current), "--baseline", str(baseline)]
+    eval_command = [str(TRACE_EXTRA), "eval", str(current), "--baseline", str(baseline)]
     result = subprocess.run(
         [*eval_command, "--json"],
         cwd=PROJECT,

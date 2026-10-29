@@ -2,13 +2,13 @@
 
 !!! tip "Setup"
 
-    * Run `mini-extra config setup` once to set the default model and API key.
+    * Run `trace-extra config setup` once to set the default model and API key.
     * This project uses one model path: [`litellm`](https://github.com/BerriAI/litellm) with tool calling.
 
 ## Setting API keys
 
-* **Recommended**: `mini-extra config setup`.
-* `mini-extra config set ANTHROPIC_API_KEY <your-api-key>` writes the key to the
+* **Recommended**: `trace-extra config setup`.
+* `trace-extra config set ANTHROPIC_API_KEY <your-api-key>` writes the key to the
   [global config file](../advanced/global_configuration.md).
 * Or export it in your shell: `export ANTHROPIC_API_KEY=<your-api-key>`.
 
@@ -18,9 +18,9 @@ documented by your provider.
 
 ## Selecting a model
 
-* `mini-extra config setup` sets the default model.
+* `trace-extra config setup` sets the default model.
 * Every CLI accepts `-m` / `--model`.
-* `mini-extra config set TRACE_SWE_MODEL_NAME <model-name>` sets the default.
+* `trace-extra config set TRACE_SWE_MODEL_NAME <model-name>` sets the default.
 * A config file can set `model.model_name`.
 * Include the provider in the name, e.g. `anthropic/claude-sonnet-4-5-20250929`,
   `openai/gpt-5.4`, or `deepseek/deepseek-flash`.

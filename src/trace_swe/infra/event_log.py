@@ -98,9 +98,12 @@ def resolve_event_log(trajectory: Path, info: dict) -> Path | None:
     candidates: list[Path] = []
     if declared:
         declared_path = Path(declared)
-        candidates.extend(
-            [declared_path] if declared_path.is_absolute() else [trajectory.parent / declared_path, declared_path]
-        )
+        if declared_path.is_absolute():
+            candidates.append(declared_path)
+        else:
+            candidates.extend([trajectory.parent / declared_path, declared_path])
+        # The log usually sits next to the trajectory; the basename also survives a moved output directory.
+        candidates.append(trajectory.parent / declared_path.name)
     candidates.append(Path(f"{trajectory}.events.jsonl"))
     return next((path for path in candidates if path.is_file()), None)
 

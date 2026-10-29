@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from trace_swe import __version__
+from trace_swe.agent.default import AgentConfig
 from trace_swe.agent.interactive import InteractiveAgent, InteractiveAgentConfig
 from trace_swe.exceptions import FormatError, InterruptAgentFlow, Submitted
 from trace_swe.infra.event_log import (
@@ -56,7 +57,7 @@ def _token_totals(messages: list[dict]) -> dict:
     return sum_usage([usage for message in messages if (usage := (message.get("extra") or {}).get("usage"))])
 
 
-class EventLogAgentConfig(InteractiveAgentConfig):
+class EventLogConfig(AgentConfig):
     event_log_path: Path | None = None
     """Where to write events. Defaults to `<output_path>.events.jsonl`."""
     event_log_output_preview_chars: int = 500
@@ -75,6 +76,10 @@ class EventLogAgentConfig(InteractiveAgentConfig):
     """Where to store outputs. Defaults to `<event log path>.outputs`."""
     workspace_fingerprint_timeout_seconds: int = 30
     """Timeout for each git command used to fingerprint the workspace."""
+
+
+class EventLogAgentConfig(EventLogConfig, InteractiveAgentConfig):
+    """Event log settings on top of the interactive agent settings."""
 
 
 class _EventLogModel:
@@ -274,12 +279,12 @@ class _EventLogEnvironment:
         return getattr(self._env, name)
 
 
-class EventLogAgent(InteractiveAgent):
-    """InteractiveAgent that additionally writes a JSONL event log."""
+class EventLogMixin:
+    """Non-interactive event logging that can be mixed into any agent class."""
 
-    def __init__(self, model, env, *, config_class: type = EventLogAgentConfig, **kwargs):
-        super().__init__(model, env, config_class=config_class, **kwargs)
-        self._model_type, self._env_type = _type_name(model), _type_name(env)
+    def __init__(self, *args, config_class: type = EventLogConfig, **kwargs):
+        super().__init__(*args, config_class=config_class, **kwargs)
+        self._model_type, self._env_type = _type_name(self.model), _type_name(self.env)
         self.events = EventLogWriter(self._event_log_path(), run_id=self.config.event_log_run_id)
         self.model = _EventLogModel(self.model, self.events)
         self.env = _EventLogEnvironment(
@@ -319,7 +324,7 @@ class EventLogAgent(InteractiveAgent):
         self._task = task
         self._step_index = 0
         self.events.new_run(self.config.event_log_run_id)
-        return self._run_with_events(lambda: super(EventLogAgent, self).run(task, **kwargs), "run_start", task=task)
+        return self._run_with_events(lambda: super(EventLogMixin, self).run(task, **kwargs), "run_start", task=task)
 
     def _run_with_events(self, start, event: str, **payload) -> dict:
         """Run `start` while bracketing it with a start event and a guaranteed run_end."""
@@ -428,3 +433,10 @@ class EventLogAgent(InteractiveAgent):
             }
         }
         return super().serialize(events, *extra_dicts)
+
+
+class EventLogAgent(EventLogMixin, InteractiveAgent):
+    """InteractiveAgent that additionally writes a JSONL event log."""
+
+    def __init__(self, *args, config_class: type = EventLogAgentConfig, **kwargs):
+        super().__init__(*args, config_class=config_class, **kwargs)

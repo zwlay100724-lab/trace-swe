@@ -3,7 +3,7 @@
 !!! abstract "Overview"
 
     * The `inspector` is a tool that allows you to browse `.traj.json` files that show the history of a trace-swe run.
-    * Quickly start it with `trace-extra i` or `mini-extra inspector`.
+    * Quickly start it with `trace-extra i` or `trace-extra inspector`.
     * See [output files](output_files.md) for the trajectory file format.
     * Alternative: [jless](https://jless.io/) is a great command-line JSON viewer for browsing trajectories.
 
@@ -19,7 +19,7 @@
 
 ```bash
 # Find all .traj.json files recursively from current directory
-mini-extra inspector
+trace-extra inspector
 # or shorter
 trace-extra i
 # Open the inspector for a specific file

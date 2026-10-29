@@ -10,7 +10,7 @@
         --8<-- "src/trace_swe/cli/commands/config.py"
         ```
 
-Utility to manage the global config file via `mini-extra config`.
+Utility to manage the global config file via `trace-extra config`.
 
 ::: trace_swe.cli.commands.config
 

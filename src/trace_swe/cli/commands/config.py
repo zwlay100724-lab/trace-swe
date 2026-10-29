@@ -33,7 +33,7 @@ console = Console(highlight=False)
 
 _SETUP_HELP = """To get started, we need to set up your global config file.
 
-You can edit it manually or use the [bold green]mini-extra config set[/bold green] or [bold green]mini-extra config edit[/bold green] commands.
+You can edit it manually or use the [bold green]trace-extra config set[/bold green] or [bold green]trace-extra config edit[/bold green] commands.
 
 This setup will ask you for your model and an API key.
 
@@ -91,7 +91,7 @@ def setup():
     set_key(global_config_file, "TRACE_SWE_CONFIGURED", "true")
     _reload_config()
     console.print(
-        "\n[bold yellow]Config finished.[/bold yellow] If you want to revisit it, run [bold green]mini-extra config setup[/bold green]."
+        "\n[bold yellow]Config finished.[/bold yellow] If you want to revisit it, run [bold green]trace-extra config setup[/bold green]."
     )
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""This is the central entry point to the mini-extra script. Use subcommands
+"""This is the central entry point to the trace-extra script. Use subcommands
 to invoke other command line utilities like running on benchmarks, editing config,
 inspecting trajectories, etc.
 """
@@ -45,7 +45,7 @@ def main():
 
     for module_path, aliases, _ in subcommands:
         if args[0] in aliases:
-            return import_module(module_path).app(args[1:], prog_name=f"mini-extra {aliases[0]}")
+            return import_module(module_path).app(args[1:], prog_name=f"trace-extra {aliases[0]}")
 
     return Console().print(get_docstring())
 

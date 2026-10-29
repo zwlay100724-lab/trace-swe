@@ -146,7 +146,10 @@ def process_instance(
             env,
             progress_manager=progress_manager,
             instance_id=instance_id,
-            **config.get("agent", {}),
+            **(
+                {"event_log_path": instance_dir / f"{instance_id}.events.jsonl"}
+                | config.get("agent", {})
+            ),
         )
         info = agent.run(task)
         exit_status = info.get("exit_status")

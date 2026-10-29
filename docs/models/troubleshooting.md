@@ -31,11 +31,11 @@ AuthenticationError: litellm.AuthenticationError: geminiException - {
     ]
   }
 }
- You can permanently set your API key with `mini-extra config set KEY VALUE`.
+ You can permanently set your API key with `trace-extra config set KEY VALUE`.
 ```
 
 Double check your API key and make sure it is correct.
-You can take a look at all your API keys with `mini-extra config edit`.
+You can take a look at all your API keys with `trace-extra config edit`.
 
 ### "Weird" authentication error
 

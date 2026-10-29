@@ -43,8 +43,8 @@ SIMPLE_TASK = "Your job is to run `ls`, verify that you see files, then quit."
 requires_openai = pytest.mark.skipif(not os.environ.get("OPENAI_API_KEY"), reason="OPENAI_API_KEY not set")
 
 
-def run_mini_command(extra_options: list[str]) -> subprocess.CompletedProcess:
-    """Run the mini command with the given extra options."""
+def run_trace_command(extra_options: list[str]) -> subprocess.CompletedProcess:
+    """Run the trace command with the given extra options."""
     cmd = [
         sys.executable,
         "-m",
@@ -65,12 +65,12 @@ def run_mini_command(extra_options: list[str]) -> subprocess.CompletedProcess:
 @requires_openai
 def test_litellm_toolcall():
     """Test the default LiteLLM tool-calling path."""
-    result = run_mini_command(["--model", "openai/gpt-5.2"])
+    result = run_trace_command(["--model", "openai/gpt-5.2"])
     assert result.returncode == 0
 
 
 @requires_openai
 def test_litellm_toolcall_explicit():
     """Test the explicit LiteLLM tool-calling path."""
-    result = run_mini_command(["--model", "openai/gpt-5.2", "--model-class", "litellm", "-c", "mini"])
+    result = run_trace_command(["--model", "openai/gpt-5.2", "--model-class", "litellm", "-c", "trace"])
     assert result.returncode == 0

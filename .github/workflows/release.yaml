@@ -118,8 +118,6 @@ jobs:
         uv pip install --python ${Python_ROOT_DIR} --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ trace-swe
         trace --help
         trace-extra --help
-        mini --help
-        mini-extra --help
 
     - name: Test pip install and CLI commands (PyPI)
       if: ${{ github.event.inputs.test_pypi != 'true' }}
@@ -127,5 +125,3 @@ jobs:
         uv pip install --python ${Python_ROOT_DIR} trace-swe
         trace --help
         trace-extra --help
-        mini --help
-        mini-extra --help
