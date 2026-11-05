@@ -65,6 +65,7 @@ nav:
     - "Command line usage":
       - "<code>trace</code>": usage/trace.md
       - "Config": usage/config.md
+      - "Evaluation": usage/evaluation.md
       - "SWE-bench": usage/swebench.md
       - "Inspector": usage/inspector.md
       - "Output files": usage/output_files.md
