@@ -21,6 +21,12 @@ class Scorer(Protocol):
 
 def prepare_workspace(task: TaskSpec, run_dir: Path) -> Path:
     """Copy a local repository into an isolated run directory."""
+    if task.image:
+        raise NotImplementedError(
+            f"Task '{task.task_id}' uses a Docker image; the local runner does not support it yet"
+        )
+    if task.base_commit:
+        raise NotImplementedError(f"Task '{task.task_id}' sets base_commit; the local runner does not support it yet")
     workspace = run_dir / "repo"
     if task.repo is None:
         workspace.mkdir(parents=True)
@@ -34,6 +40,13 @@ def prepare_workspace(task: TaskSpec, run_dir: Path) -> Path:
         ignore=shutil.ignore_patterns(".git", "__pycache__", ".pytest_cache", ".venv"),
     )
     return workspace
+
+
+def _protected_hashes(workspace: Path, files: list[str]) -> dict[str, str | None]:
+    return {
+        file: hashlib.sha256((workspace / file).read_bytes()).hexdigest() if (workspace / file).is_file() else None
+        for file in files
+    }
 
 
 def _digest(value: object) -> str:
@@ -126,6 +139,7 @@ class TaskRunner:
         run_dir = self.output_dir / task.task_id / f"run-{run_index:02d}"
         run_dir.mkdir(parents=True, exist_ok=True)
         workspace = self.prepare(task, run_dir)
+        protected_before = _protected_hashes(workspace, task.protected_files)
         agent = self.agent_factory(task, workspace)
         trajectory = run_dir / "run.traj.json"
         agent.config.output_path = trajectory
@@ -136,6 +150,8 @@ class TaskRunner:
         agent.save(trajectory)
 
         score = self.scorer.score(task, trajectory, workspace)
+        if _protected_hashes(workspace, task.protected_files) != protected_before:
+            score = score.model_copy(update={"resolved": False, "failure_reason": "protected_file_modified"})
         config = _agent_config(agent)
         config_for_hash = {
             key: value

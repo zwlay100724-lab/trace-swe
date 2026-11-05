@@ -59,7 +59,9 @@ version, git commit, seed, timestamps, exit status, task state, and artifact
 paths. This is the record used to audit or replay a run.
 
 `eval-run` currently supports local tasks. Docker tasks need a runner that scores
-inside the container.
+inside the container. `base_commit` is also not applied yet; the runner copies the
+current working tree. Files listed in `protected_files` are hashed before and after
+the run, and any change marks the attempt as `protected_file_modified`.
 
 ## Offline evaluation
 
