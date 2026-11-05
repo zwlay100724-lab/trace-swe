@@ -404,3 +404,60 @@ def test_compare_reports_prompt_tokens_per_call():
     baseline = [make_run(prompt_tokens=20, calls_with_usage=1)]
     delta = compare(current, baseline)["overall"]["prompt_tokens_per_call"]
     assert (delta["current"], delta["baseline"], delta["delta"], delta["delta_pct"]) == (10, 20, -10, -50.0)
+
+
+def test_aggregate_reports_success_ci_and_false_completion():
+    runs = [
+        make_run("Succeeded", success=True, exit_status="Submitted"),
+        make_run("VerificationFailed", success=False, exit_status="Submitted"),
+        make_run("Unverified", success=False, exit_status="Submitted"),
+        make_run("Error", success=False, exit_status="Submitted"),
+    ]
+    summary = aggregate(runs)
+
+    assert summary["success_ci"]["low"] < summary["success_rate"] < summary["success_ci"]["high"]
+    assert (summary["n_submitted"], summary["false_completion_rate"]) == (4, 0.75)
+
+
+def test_aggregate_reports_cost_per_solved():
+    runs = [
+        make_run("Succeeded", success=True, cost=0.2),
+        make_run("Error", success=False, cost=0.2),
+    ]
+    assert aggregate(runs)["cost_per_solved"] == 0.4
+
+
+def test_compare_reports_paired_success_delta():
+    current = [make_run("Succeeded", success=True, group="a"), make_run("Unverified", success=False, group="b")]
+    baseline = [make_run("Unverified", success=False, group="a"), make_run("Unverified", success=False, group="b")]
+    paired = compare(current, baseline)["paired"]
+
+    assert (paired["n_groups"], paired["success_rate"]["delta"]) == (2, 0.5)
+    assert paired["success_rate"]["ci_low"] >= 0.0
+
+
+def test_eval_cli_fail_on_regression(tmp_path):
+    current, baseline = tmp_path / "current", tmp_path / "baseline"
+    write_trajectory(current, "a.traj.json", info={"exit_status": "Submitted"})
+    write_trajectory(baseline, "a.traj.json", info={"exit_status": "Submitted", "task_state": "Succeeded"})
+
+    result = CliRunner().invoke(
+        app,
+        [str(current), "--baseline", str(baseline), "--json", "--fail-on-regression"],
+    )
+
+    assert result.exit_code == 1
+    assert json.loads(result.output)["comparison"]["regression"]["passed"] is False
+
+
+def test_eval_cli_regression_gate_passes_without_drop(tmp_path):
+    current, baseline = tmp_path / "current", tmp_path / "baseline"
+    write_trajectory(current, "a.traj.json", info={"exit_status": "Submitted", "task_state": "Succeeded"})
+    write_trajectory(baseline, "a.traj.json", info={"exit_status": "Submitted", "task_state": "Succeeded"})
+
+    result = CliRunner().invoke(
+        app,
+        [str(current), "--baseline", str(baseline), "--json", "--fail-on-regression"],
+    )
+
+    assert (result.exit_code, json.loads(result.output)["comparison"]["regression"]["passed"]) == (0, True)

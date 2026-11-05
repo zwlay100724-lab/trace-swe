@@ -8,6 +8,9 @@ import pytest
 
 from trace_swe.cli.trace import DEFAULT_CONFIG_FILE, app, main
 
+TRACE = [sys.executable, "-m", "trace_swe"]
+TRACE_EXTRA = [sys.executable, "-m", "trace_swe.cli.commands.trace_extra"]
+
 
 def strip_ansi_codes(text: str) -> str:
     """Remove ANSI escape sequences from text."""
@@ -351,23 +354,10 @@ def test_python_m_trace_swe_help():
     assert "trace-swe" in result.stdout
 
 
-def test_mini_script_help():
-    """Test that the mini script entry point help works."""
-    result = subprocess.run(
-        ["mini", "--help"],
-        capture_output=True,
-        text=True,
-        timeout=10,
-    )
-
-    assert result.returncode == 0
-    assert "trace-swe" in result.stdout
-
-
 def test_trace_help():
     """Test that trace --help works correctly."""
     result = subprocess.run(
-        ["trace", "--help"],
+        [*TRACE, "--help"],
         capture_output=True,
         text=True,
         timeout=10,
@@ -379,9 +369,9 @@ def test_trace_help():
 
 
 def test_trace_extra_help():
-    """Test that mini-extra --help works correctly."""
+    """Test that trace-extra --help works correctly."""
     result = subprocess.run(
-        ["mini-extra", "--help"],
+        [*TRACE_EXTRA, "--help"],
         capture_output=True,
         text=True,
         timeout=10,
@@ -395,34 +385,22 @@ def test_trace_extra_help():
     assert "swebench" in clean_output
 
 
-def test_trace_extra_help():
-    """Test that trace-extra --help works correctly."""
-    result = subprocess.run(
-        ["trace-extra", "--help"],
-        capture_output=True,
-        text=True,
-        timeout=10,
-    )
-
-    assert result.returncode == 0
-    clean_output = strip_ansi_codes(result.stdout)
-    assert "central entry point for all extra commands" in clean_output
-
-
 @pytest.mark.parametrize(
     ("subcommand", "aliases"),
     [
         ("config", ["config"]),
         ("inspect", ["inspect", "i", "inspector"]),
+        ("events", ["events"]),
+        ("resume", ["resume"]),
+        ("eval", ["eval"]),
         ("swebench", ["swebench"]),
-        ("swebench-single", ["swebench-single"]),
     ],
 )
 def test_trace_extra_subcommand_help(subcommand: str, aliases: list[str]):
-    """Test that mini-extra subcommands --help work correctly."""
+    """Test that trace-extra subcommands --help work correctly."""
     for alias in aliases:
         result = subprocess.run(
-            ["mini-extra", alias, "--help"],
+            [*TRACE_EXTRA, alias, "--help"],
             capture_output=True,
             text=True,
             timeout=10,
@@ -434,9 +412,9 @@ def test_trace_extra_subcommand_help(subcommand: str, aliases: list[str]):
 
 
 def test_trace_extra_config_help():
-    """Test that mini-extra config --help works correctly."""
+    """Test that trace-extra config --help works correctly."""
     result = subprocess.run(
-        ["mini-extra", "config", "--help"],
+        [*TRACE_EXTRA, "config", "--help"],
         capture_output=True,
         text=True,
         timeout=10,

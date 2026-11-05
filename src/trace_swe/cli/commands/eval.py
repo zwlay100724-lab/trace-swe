@@ -10,6 +10,13 @@ from rich.console import Console
 from rich.table import Table
 
 from trace_swe.cli.commands.events import summarize
+from trace_swe.evaluation.metrics import (
+    cost_per_solved,
+    mcnemar_exact,
+    paired_bootstrap_diff,
+    pass_at_k,
+    wilson_interval,
+)
 from trace_swe.infra.event_log import read_events, resolve_event_log
 
 OUTCOMES = ("Succeeded", "VerificationFailed", "Unverified", "Incomplete", "Error")
@@ -28,6 +35,32 @@ def classify_outcome(task_state: str | None, exit_status: str | None) -> str:
 
 def _p95(values: list[float]) -> float | None:
     return sorted(values)[max(0, math.ceil(0.95 * len(values)) - 1)] if values else None
+
+
+def _success_ci(successes: int, n: int) -> dict | None:
+    interval = wilson_interval(successes, n)
+    return None if interval is None else {"low": interval[0], "high": interval[1]}
+
+
+def _is_submitted(run: dict) -> bool:
+    return run.get("exit_status") == "Submitted" or run.get("task_state") in (
+        "Succeeded",
+        "VerificationFailed",
+        "Unverified",
+    )
+
+
+def _false_completion_rate(runs: list[dict]) -> float | None:
+    submitted = [run for run in runs if _is_submitted(run)]
+    if not submitted:
+        return None
+    return sum(1 for run in submitted if not run.get("success")) / len(submitted)
+
+
+def _cost_per_solved(runs: list[dict]) -> float | None:
+    costs = [run["cost"] for run in runs if run.get("cost") is not None]
+    solved = sum(1 for run in runs if run.get("success"))
+    return cost_per_solved(sum(costs), solved) if costs else None
 
 
 def _stats(values: list[float | int | None]) -> dict:
@@ -94,6 +127,10 @@ def aggregate(runs: list[dict]) -> dict:
         "n_runs": len(runs),
         "successes": buckets["Succeeded"],
         "success_rate": buckets["Succeeded"] / len(runs) if runs else None,
+        "success_ci": _success_ci(buckets["Succeeded"], len(runs)),
+        "n_submitted": sum(1 for run in runs if _is_submitted(run)),
+        "false_completion_rate": _false_completion_rate(runs),
+        "cost_per_solved": _cost_per_solved(runs),
         "buckets": buckets,
         "n_load_errors": sum(1 for r in runs if r.get("error")),
         "cost": _stats([r.get("cost") for r in runs]),
@@ -283,9 +320,18 @@ def group_runs(runs: list[dict]) -> dict[str, list[dict]]:
     return groups
 
 
+def _pass_at_k(runs: list[dict]) -> dict | None:
+    n = len(runs)
+    if n == 0:
+        return None
+    k = min(3, n)
+    return {"k": k, "value": pass_at_k(n, sum(1 for run in runs if run.get("success")), k)}
+
+
 def _group_report(runs: list[dict]) -> list[dict]:
     return [
-        {"group": group, "summary": aggregate(group_runs)} for group, group_runs in sorted(group_runs(runs).items())
+        {"group": group, "summary": aggregate(group_runs), "pass_at_k": _pass_at_k(group_runs)}
+        for group, group_runs in sorted(group_runs(runs).items())
     ]
 
 
@@ -329,7 +375,11 @@ def _delta_summary(current: dict, baseline: dict) -> dict:
                 if current["success_rate"] is not None and baseline["success_rate"] is not None
                 else None
             ),
+            "current_ci": current["success_ci"],
+            "baseline_ci": baseline["success_ci"],
         },
+        "cost_per_solved": _delta(current["cost_per_solved"], baseline["cost_per_solved"], pct=True),
+        "false_completion_rate": _delta(current["false_completion_rate"], baseline["false_completion_rate"]),
         "buckets": {outcome: _delta(current["buckets"][outcome], baseline["buckets"][outcome]) for outcome in OUTCOMES},
         "cost_total": _delta(current["cost"]["total"], baseline["cost"]["total"], pct=True),
         "cost_mean": _delta(current["cost"]["mean"], baseline["cost"]["mean"], pct=True),
@@ -343,10 +393,28 @@ def _delta_summary(current: dict, baseline: dict) -> dict:
     }
 
 
-def compare(current_runs: list[dict], baseline_runs: list[dict]) -> dict:
+def _group_success_rate(runs: list[dict]) -> float | None:
+    return sum(1 for run in runs if run.get("success")) / len(runs) if runs else None
+
+
+def _paired_summary(current_groups: dict, baseline_groups: dict, *, bootstrap: int, seed: int) -> dict:
+    keys = sorted(current_groups.keys() & baseline_groups.keys())
+    current_rates = [_group_success_rate(current_groups[key]) for key in keys]
+    baseline_rates = [_group_success_rate(baseline_groups[key]) for key in keys]
+    if any(rate is None for rate in current_rates + baseline_rates):
+        return {"n_groups": len(keys), "success_rate": None, "mcnemar_p": None}
+    return {
+        "n_groups": len(keys),
+        "success_rate": paired_bootstrap_diff(current_rates, baseline_rates, resamples=bootstrap, seed=seed),
+        "mcnemar_p": mcnemar_exact([rate > 0 for rate in current_rates], [rate > 0 for rate in baseline_rates]),
+    }
+
+
+def compare(current_runs: list[dict], baseline_runs: list[dict], *, bootstrap: int = 2000, seed: int = 0) -> dict:
     current_groups, baseline_groups = group_runs(current_runs), group_runs(baseline_runs)
     return {
         "overall": _delta_summary(aggregate(current_runs), aggregate(baseline_runs)),
+        "paired": _paired_summary(current_groups, baseline_groups, bootstrap=bootstrap, seed=seed),
         "matched": [
             {"group": key, "delta": _delta_summary(aggregate(current_groups[key]), aggregate(baseline_groups[key]))}
             for key in sorted(current_groups.keys() & baseline_groups.keys())
@@ -360,6 +428,17 @@ def compare(current_runs: list[dict], baseline_runs: list[dict]) -> dict:
             for key in sorted(baseline_groups.keys() - current_groups.keys())
         ],
     }
+
+
+def regression_check(comparison: dict, max_success_drop: float, max_cost_increase: float) -> dict:
+    success_delta_pp = comparison["overall"]["success_rate"]["delta_pp"]
+    cost_delta_pct = comparison["overall"]["cost_per_solved"]["delta_pct"]
+    reasons = []
+    if success_delta_pp is not None and success_delta_pp < -max_success_drop * 100:
+        reasons.append(f"success rate dropped {abs(success_delta_pp):.1f}pp")
+    if cost_delta_pct is not None and cost_delta_pct > max_cost_increase * 100:
+        reasons.append(f"cost per solved increased {cost_delta_pct:.1f}%")
+    return {"passed": not reasons, "reasons": reasons}
 
 
 app = typer.Typer(rich_markup_mode="rich")
@@ -387,13 +466,17 @@ def _render_summary(summary: dict) -> None:
     table.add_column("metric")
     table.add_column("value", justify="right")
     table.add_row("trajectories", str(summary["n_runs"]))
-    table.add_row("Succeeded (strict)", f"{summary['successes']} ({_fmt_pct(summary['success_rate'])})")
+    ci = summary.get("success_ci")
+    ci_text = f", 95% CI {_fmt_pct(ci['low'])}–{_fmt_pct(ci['high'])}" if ci else ""
+    table.add_row("Succeeded (strict)", f"{summary['successes']} ({_fmt_pct(summary['success_rate'])}{ci_text})")
     for outcome in OUTCOMES[1:]:
         table.add_row(outcome, str(summary["buckets"][outcome]))
     table.add_row(
         "cost total / mean / median",
         " / ".join(_fmt_money(summary["cost"][key]) for key in ("total", "mean", "median")),
     )
+    table.add_row("cost per solved", _fmt_money(summary["cost_per_solved"]))
+    table.add_row("false completion rate", _fmt_pct(summary["false_completion_rate"]))
     table.add_row(
         "prompt tokens total / per call",
         f"{_fmt_int(summary['prompt_tokens']['total'])} / {_fmt(summary['mean_prompt_per_call'])}",
@@ -494,6 +577,8 @@ def _render_comparison(comparison: dict) -> None:
     )
     for key, label, formatter in (
         ("cost_mean", "mean cost", _fmt_money),
+        ("cost_per_solved", "cost per solved", _fmt_money),
+        ("false_completion_rate", "false completion", _fmt_pct),
         ("n_steps_mean", "mean steps", _fmt),
         ("wall_s_mean", "mean wall", lambda value: _fmt(value, unit="s")),
         ("retry_rate", "retry rate", _fmt),
@@ -505,6 +590,10 @@ def _render_comparison(comparison: dict) -> None:
             delta_text = "n/a"
         elif key == "cost_mean":
             delta_text = f"{delta['delta']:+.4f}"
+        elif key == "cost_per_solved":
+            delta_text = f"{delta['delta']:+.4f}"
+        elif key == "false_completion_rate":
+            delta_text = f"{delta['delta'] * 100:+.1f}pp"
         elif key in ("prompt_tokens_per_call", "elisions_total"):
             delta_text = f"{delta['delta']:+.0f}"
         else:
@@ -516,6 +605,19 @@ def _render_comparison(comparison: dict) -> None:
             delta_text,
         )
     console.print(table)
+    paired = comparison.get("paired") or {}
+    rate = paired.get("success_rate")
+    if rate:
+        console.print(
+            f"Paired success delta: {rate['delta'] * 100:+.1f}pp "
+            f"(95% CI {_fmt_pct(rate['ci_low'])}–{_fmt_pct(rate['ci_high'])}, "
+            f"p={_fmt(rate['p_value'], 3)})"
+        )
+    if paired.get("mcnemar_p") is not None:
+        console.print(f"McNemar p={paired['mcnemar_p']:.3f} ({paired['n_groups']} matched groups)")
+    regression = comparison.get("regression")
+    if regression and not regression["passed"]:
+        console.print(f"[red]Regression gate failed: {'; '.join(regression['reasons'])}[/red]")
     if comparison["matched"]:
         groups = Table(title="Groups", header_style="bold")
         for column in ("group", "runs cur/base", "success cur/base/delta", "cost delta %"):
@@ -548,22 +650,33 @@ def main(
     baseline: Path | None = typer.Option(None, "--baseline", help="Baseline directory or trajectory"),
     json_output: bool = typer.Option(False, "--json", help="Print JSON instead of tables"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show one row per trajectory"),
+    bootstrap: int = typer.Option(2000, "--bootstrap", min=100, help="Bootstrap resamples for paired comparisons"),
+    fail_on_regression: bool = typer.Option(False, "--fail-on-regression", help="Exit non-zero on a regression"),
+    max_success_drop: float = typer.Option(0.05, "--max-success-drop", min=0.0, max=1.0),
+    max_cost_increase: float = typer.Option(0.20, "--max-cost-increase", min=0.0),
 ) -> None:
     if not path.exists():
         raise typer.BadParameter(f"Path '{path}' does not exist")
     if baseline is not None and not baseline.exists():
         raise typer.BadParameter(f"Baseline path '{baseline}' does not exist")
+    if fail_on_regression and baseline is None:
+        raise typer.BadParameter("--fail-on-regression requires --baseline")
 
     report = build_report(path)
     if baseline is not None:
         report["baseline_path"] = str(baseline)
-        report["comparison"] = compare(report["runs"], build_report(baseline)["runs"])
+        report["comparison"] = compare(report["runs"], build_report(baseline)["runs"], bootstrap=bootstrap)
+        report["comparison"]["regression"] = regression_check(report["comparison"], max_success_drop, max_cost_increase)
     else:
         report["baseline_path"] = None
         report["comparison"] = None
 
+    failed = bool(fail_on_regression and report["comparison"] and not report["comparison"]["regression"]["passed"])
+
     if json_output:
         typer.echo(json.dumps(report, indent=2, allow_nan=False))
+        if failed:
+            raise typer.Exit(1)
         return
 
     console.print(f"Evaluated [bold]{report['summary']['n_runs']}[/bold] trajectory file(s) from '{path}'")
@@ -575,6 +688,8 @@ def main(
         _render_runs(report)
     if report["comparison"]:
         _render_comparison(report["comparison"])
+    if failed:
+        raise typer.Exit(1)
 
 
 if __name__ == "__main__":
