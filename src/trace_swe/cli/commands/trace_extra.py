@@ -20,6 +20,7 @@ subcommands = [
         ["eval"],
         "Evaluate saved trajectories offline (aggregate metrics, compare baseline)",
     ),
+    ("trace_swe.cli.commands.eval_run", ["eval-run"], "Run a JSONL task set end to end"),
     ("trace_swe.benchmarks.swebench", ["swebench"], "Evaluate on SWE-bench (batch mode)"),
 ]
 
